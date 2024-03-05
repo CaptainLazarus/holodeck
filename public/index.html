@@ -16,8 +16,6 @@ canvas {
 <body>
     <div id="scene-container" style="width: 100%; height: 100vh"></div>
     <div id="cameraInfo" style="color: #fff; background: #000; padding: 5px; position: absolute; top: 0; left: 0"></div>
-    <script src="https://unpkg.com/three/build/three.min.js"></script>
-    <!-- Ensure the paths to your JS files are correct -->
     <script>// modules are defined as an array
 // [ module function, map of requires ]
 //
@@ -162,14 +160,14 @@ canvas {
       this[globalName] = mainExports;
     }
   }
-})({"jd9zC":[function(require,module,exports) {
+})({"QQt8Y":[function(require,module,exports) {
 var global = arguments[3];
 var HMR_HOST = null;
 var HMR_PORT = 1234;
 var HMR_SECURE = false;
 var HMR_ENV_HASH = "d6ea1d42532a7575";
 var HMR_USE_SSE = false;
-module.bundle.HMR_BUNDLE_ID = "c3727afea66e0e85";
+module.bundle.HMR_BUNDLE_ID = "9ddcd15f4182578b";
 "use strict";
 /* global HMR_HOST, HMR_PORT, HMR_ENV_HASH, HMR_SECURE, HMR_USE_SSE, chrome, browser, __parcel__import__, __parcel__importScripts__, ServiceWorkerGlobalScope */ /*::
 import type {
@@ -603,7 +601,7 @@ function hmrAccept(bundle /*: ParcelRequire */ , id /*: string */ ) {
     });
 }
 
-},{}],"81u0S":[function(require,module,exports) {
+},{}],"d7jqD":[function(require,module,exports) {
 var _sceneManagerJs = require("./js/SceneManager.js");
 document.addEventListener("DOMContentLoaded", ()=>{
     const container = document.getElementById("scene-container");
@@ -631,6 +629,7 @@ class SceneManager {
         this.raycaster = new _three.Raycaster();
         this.mouse = new _three.Vector2();
         this.plane = new _three.Plane(new _three.Vector3(0, 0, 1), 0);
+        this.boxes = []; // Add this in the constructor of SceneManager
         this.init();
     }
     init() {
@@ -680,6 +679,7 @@ class SceneManager {
                 z: intersectionPoint.z
             });
             this.scene.add(box.mesh);
+            this.boxes.push(box); // Keep track of the box
         }
     }
     animate() {
@@ -32664,7 +32664,7 @@ class OrbitControls extends (0, _three.EventDispatcher) {
     }
 }
 
-},{"three":"ktPTu","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}]},["jd9zC","81u0S"], "81u0S", "parcelRequire33bf")
+},{"three":"ktPTu","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}]},["QQt8Y","d7jqD"], "d7jqD", "parcelRequire33bf")
 
 </script>
 </body>

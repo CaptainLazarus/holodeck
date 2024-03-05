@@ -12,7 +12,7 @@ export class SceneManager {
 	    75,
 	    window.innerWidth / window.innerHeight,
 	    0.1,
-	    1000,
+	    1000
 	);
 	this.renderer = new THREE.WebGLRenderer({ antialias: true });
 	this.raycaster = new THREE.Raycaster();
@@ -37,15 +37,14 @@ export class SceneManager {
 	this.renderer.domElement.addEventListener(
 	    "click",
 	    this.onCanvasClick.bind(this),
-	    false,
+	    false
 	);
 	this.renderer.domElement.addEventListener(
 	    "touchstart",
 	    this.onCanvasTouch.bind(this),
-	    false,
+	    false
 	);
-	this.renderer.domElement.addEventListener('dblclick', this.onDoubleClick.bind(this), false);
-
+	
 	this.animate();
     }
 
