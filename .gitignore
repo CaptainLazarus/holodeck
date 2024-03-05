@@ -1,6 +1,5 @@
 node_modules
 .npm
 .eslintrc.json
-.gitignore
 .parcel-cache
 *.*~
