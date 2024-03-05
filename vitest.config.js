@@ -1,9 +1,8 @@
-// vitest.config.js
 import { defineConfig } from 'vitest/config';
 
 export default defineConfig({
   test: {
-    setupFiles: ['./vitest.setup.js'], // Adjust the path as necessary
+    globals: true, // This makes `vi` available globally in tests
     environment: 'jsdom',
   },
 });

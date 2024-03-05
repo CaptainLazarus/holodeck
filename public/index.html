@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
+  <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Three.js App</title>
@@ -12,12 +12,11 @@ canvas {
   display: block;
 }
 </style>
-</head>
-<body>
+  </head>
+  <body>
     <div id="scene-container" style="width: 100%; height: 100vh"></div>
     <div id="cameraInfo" style="color: #fff; background: #000; padding: 5px; position: absolute; top: 0; left: 0"></div>
     <script src="https://unpkg.com/three/build/three.min.js"></script>
-    <!-- Ensure the paths to your JS files are correct -->
     <script>// modules are defined as an array
 // [ module function, map of requires ]
 //
@@ -162,14 +161,14 @@ canvas {
       this[globalName] = mainExports;
     }
   }
-})({"jd9zC":[function(require,module,exports) {
+})({"lYsYl":[function(require,module,exports) {
 var global = arguments[3];
 var HMR_HOST = null;
 var HMR_PORT = 1234;
 var HMR_SECURE = false;
 var HMR_ENV_HASH = "d6ea1d42532a7575";
 var HMR_USE_SSE = false;
-module.bundle.HMR_BUNDLE_ID = "c3727afea66e0e85";
+module.bundle.HMR_BUNDLE_ID = "746d8206ff79fe9f";
 "use strict";
 /* global HMR_HOST, HMR_PORT, HMR_ENV_HASH, HMR_SECURE, HMR_USE_SSE, chrome, browser, __parcel__import__, __parcel__importScripts__, ServiceWorkerGlobalScope */ /*::
 import type {
@@ -603,102 +602,68 @@ function hmrAccept(bundle /*: ParcelRequire */ , id /*: string */ ) {
     });
 }
 
-},{}],"81u0S":[function(require,module,exports) {
+},{}],"jZvPP":[function(require,module,exports) {
+var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
 var _sceneManagerJs = require("./js/SceneManager.js");
+var _sceneManagerJsDefault = parcelHelpers.interopDefault(_sceneManagerJs);
+var _sceneRendererJs = require("./js/SceneRenderer.js");
+var _sceneRendererJsDefault = parcelHelpers.interopDefault(_sceneRendererJs);
 document.addEventListener("DOMContentLoaded", ()=>{
     const container = document.getElementById("scene-container");
-    new (0, _sceneManagerJs.SceneManager)(container);
+    const sceneManager = new (0, _sceneManagerJsDefault.default)();
+    new (0, _sceneRendererJsDefault.default)(sceneManager, container);
 });
 
-},{"./js/SceneManager.js":"d3h3I"}],"d3h3I":[function(require,module,exports) {
-// src/js/SceneManager.js
+},{"./js/SceneManager.js":"d3h3I","./js/SceneRenderer.js":"jIbW5","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"d3h3I":[function(require,module,exports) {
 var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
 parcelHelpers.defineInteropFlag(exports);
-parcelHelpers.export(exports, "SceneManager", ()=>SceneManager);
-var _three = require("three");
-var _boxJs = require("./Box.js");
-var _boxJsDefault = parcelHelpers.interopDefault(_boxJs);
-var _orbitControlsJs = require("three/examples/jsm/controls/OrbitControls.js");
+var _box = require("./Box");
+var _boxDefault = parcelHelpers.interopDefault(_box);
 class SceneManager {
-    constructor(container){
-        this.container = container;
-        this.scene = new _three.Scene();
-        this.scene.background = new _three.Color(0xffffff); // Set background to white
-        this.camera = new _three.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-        this.renderer = new _three.WebGLRenderer({
-            antialias: true
-        });
-        this.raycaster = new _three.Raycaster();
-        this.mouse = new _three.Vector2();
-        this.plane = new _three.Plane(new _three.Vector3(0, 0, 1), 0);
-        this.init();
+    constructor(){
+        this.boxes = [];
     }
-    init() {
-        this.camera.position.set(0, 0, 500);
-        this.renderer.setSize(window.innerWidth, window.innerHeight);
-        this.container.appendChild(this.renderer.domElement);
-        // Set up OrbitControls
-        this.controls = new (0, _orbitControlsJs.OrbitControls)(this.camera, this.renderer.domElement);
-        this.controls.target.set(0, 0, 0); // Optionally, set the point the camera will orbit around
-        this.controls.update();
-        // Event listeners
-        window.addEventListener("resize", this.onWindowResize.bind(this), false);
-        this.renderer.domElement.addEventListener("click", this.onCanvasClick.bind(this), false);
-        this.renderer.domElement.addEventListener("touchstart", this.onCanvasTouch.bind(this), false);
-        this.animate();
+    addBox(boxData) {
+        const box = new (0, _boxDefault.default)(boxData.width, boxData.height, boxData.depth, boxData.color, boxData.position);
+        this.boxes.push(box);
     }
-    onWindowResize() {
-        this.camera.aspect = window.innerWidth / window.innerHeight;
-        this.camera.updateProjectionMatrix();
-        this.renderer.setSize(window.innerWidth, window.innerHeight);
-    }
-    onCanvasClick(event) {
-        const rect = this.renderer.domElement.getBoundingClientRect();
-        this.addBox(event.clientX - rect.left, event.clientY - rect.top);
-    }
-    onCanvasTouch(event) {
-        event.preventDefault();
-        if (event.touches.length > 0) {
-            const touch = event.touches[0];
-            const rect = this.renderer.domElement.getBoundingClientRect();
-            this.addBox(touch.clientX - rect.left, touch.clientY - rect.top);
-        }
-    }
-    addBox(x, y) {
-        // Adjust to normalized device coordinates
-        this.mouse.x = x / this.renderer.domElement.clientWidth * 2 - 1;
-        this.mouse.y = -(y / this.renderer.domElement.clientHeight) * 2 + 1;
-        // Update the picking ray with the camera and mouse position
-        this.raycaster.setFromCamera(this.mouse, this.camera);
-        // Initialize a new Vector3 for the intersection point
-        const intersectionPoint = new _three.Vector3();
-        // Determine the point where the picking ray intersects the plane
-        if (this.raycaster.ray.intersectPlane(this.plane, intersectionPoint)) {
-            const box = new (0, _boxJsDefault.default)(60, 30, 30, 0x000000, {
-                x: intersectionPoint.x,
-                y: intersectionPoint.y,
-                z: intersectionPoint.z
-            });
-            this.scene.add(box.mesh);
-        }
-    }
-    animate() {
-        requestAnimationFrame(()=>this.animate());
-        this.controls.update();
-        // Display camera position and rotation on the screen
-        this.showCameraInfo();
-        this.renderer.render(this.scene, this.camera);
-    }
-    showCameraInfo() {
-        const pos = this.camera.position;
-        const rot = this.camera.rotation;
-        const info = `Position: (${pos.x.toFixed(2)}, ${pos.y.toFixed(2)}, ${pos.z.toFixed(2)}) Rotation: (${rot.x.toFixed(2)}, ${rot.y.toFixed(2)}, ${rot.z.toFixed(2)})`;
-        // Assuming you have an element with id 'cameraInfo' in your HTML
-        document.getElementById("cameraInfo").innerText = info;
+    removeBox(boxId) {
+        this.boxes = this.boxes.filter((box)=>box.id !== boxId);
     }
 }
+exports.default = SceneManager;
 
-},{"three":"ktPTu","./Box.js":"hamLA","three/examples/jsm/controls/OrbitControls.js":"7mqRv","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"ktPTu":[function(require,module,exports) {
+},{"./Box":"hamLA","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"hamLA":[function(require,module,exports) {
+var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
+parcelHelpers.defineInteropFlag(exports);
+var _three = require("three");
+class Box {
+    constructor(width, height, depth, color, position){
+        this.width = width;
+        this.height = height;
+        this.depth = depth;
+        this.color = color;
+        this.position = position;
+        this.mesh = this.createMesh();
+        this.id = this.mesh.uuid;
+    }
+    createMesh() {
+        const geometry = new _three.BoxGeometry(this.width, this.height, this.depth);
+        const material = new _three.MeshBasicMaterial({
+            color: this.color
+        });
+        const mesh = new _three.Mesh(geometry, material);
+        mesh.position.set(this.position.x, this.position.y, this.position.z);
+        return mesh;
+    }
+    updateColor(newColor) {
+        this.color = newColor;
+        this.mesh.material.color.set(newColor);
+    }
+}
+exports.default = Box;
+
+},{"three":"ktPTu","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"ktPTu":[function(require,module,exports) {
 /**
  * @license
  * Copyright 2010-2023 Three.js Authors
@@ -31806,27 +31771,165 @@ exports.export = function(dest, destName, get) {
     });
 };
 
-},{}],"hamLA":[function(require,module,exports) {
+},{}],"jIbW5":[function(require,module,exports) {
+// Assuming SceneUtils is properly imported and contains the necessary methods.
 var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
 parcelHelpers.defineInteropFlag(exports);
+var _threeJSWrapper = require("./ThreeJSWrapper");
 var _three = require("three");
-class Box {
-    constructor(width = 60, height = 30, depth = 30, color = 0x000000, position = {
-        x: 0,
-        y: 0,
-        z: 0
-    }){
-        const geometry = new _three.BoxGeometry(width, height, depth);
-        const material = new _three.MeshBasicMaterial({
-            color
-        });
-        this.mesh = new _three.Mesh(geometry, material);
-        this.mesh.position.set(position.x, position.y, position.z);
+var _sceneUtils = require("./SceneUtils");
+var _sceneUtilsDefault = parcelHelpers.interopDefault(_sceneUtils);
+class SceneRenderer {
+    constructor(sceneManager, container){
+        this.sceneManager = sceneManager;
+        this.rendererWrapper = new (0, _threeJSWrapper.RendererWrapper)(container);
+        this.cameraWrapper = new (0, _threeJSWrapper.CameraWrapper)();
+        this.controlsWrapper = new (0, _threeJSWrapper.ControlsWrapper)(this.cameraWrapper, this.rendererWrapper);
+        this.sceneWrapper = new (0, _threeJSWrapper.SceneWrapper)();
+        this.setupEventListeners();
+        this.animate();
+    }
+    setupEventListeners() {
+        window.addEventListener("resize", this.onWindowResize.bind(this), false);
+        this.rendererWrapper.getDomElement().addEventListener("click", this.handleClick.bind(this), false);
+    }
+    animate() {
+        requestAnimationFrame(()=>this.animate());
+        this.controlsWrapper.update();
+        this.renderScene();
+        this.rendererWrapper.render(this.sceneWrapper.getScene(), this.cameraWrapper.getCamera());
+    }
+    renderScene() {
+        this.sceneWrapper.clear();
+        this.renderBoxes();
+    }
+    renderBoxes() {
+        for (const box of this.sceneManager.boxes){
+            const mesh = (0, _sceneUtilsDefault.default).createBox(box.width, box.height, box.depth, box.color, box.position);
+            this.sceneWrapper.add(mesh);
+        }
+    }
+    onWindowResize() {
+        this.cameraWrapper.setAspectRatio(window.innerWidth / window.innerHeight);
+        this.cameraWrapper.updateProjectionMatrix();
+        this.rendererWrapper.setSize(window.innerWidth, window.innerHeight);
+    }
+    handleClick(event) {
+        const mousePosition = new _three.Vector2(event.clientX / window.innerWidth * 2 - 1, -(event.clientY / window.innerHeight) * 2 + 1);
+        const raycaster = new _three.Raycaster();
+        raycaster.setFromCamera(mousePosition, this.cameraWrapper.getCamera());
+        const intersects = (0, _sceneUtilsDefault.default).getIntersectingObjects(raycaster, this.sceneWrapper.getScene().children);
+        if (intersects.length > 0) {
+            const firstIntersectedObject = intersects[0].object;
+            this.handleBoxClick(firstIntersectedObject);
+        } else this.handlePlaneClick(raycaster);
+    }
+    handleBoxClick(intersectedBox) {
+        // Example: toggle box color between default and highlight.
+        const newColor = intersectedBox.material.color.getHex() === this.defaultColor ? this.highlightColor : this.defaultColor;
+        intersectedBox.material.color.setHex(newColor);
+    // Update sceneManager or handle as needed
+    }
+    handlePlaneClick(raycaster) {
+        // Assume this method aims to add a new box where the plane was clicked.
+        const intersects = (0, _sceneUtilsDefault.default).getIntersectingObjects(raycaster, [
+            this.sceneWrapper.getScene().children.find((child)=>child.type === "Mesh")
+        ]); // Assuming the plane is the first Mesh added to the scene
+        if (intersects.length > 0) {
+            const intersect = intersects[0];
+            this.sceneManager.addBox({
+                width: 50,
+                height: 50,
+                depth: 50,
+                color: this.defaultColor,
+                position: intersect.point
+            });
+        }
     }
 }
-exports.default = Box;
+exports.default = SceneRenderer;
 
-},{"three":"ktPTu","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"7mqRv":[function(require,module,exports) {
+},{"./ThreeJSWrapper":"bycXg","three":"ktPTu","./SceneUtils":"k65t5","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"bycXg":[function(require,module,exports) {
+// ThreeJsWrappers.js
+var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
+parcelHelpers.defineInteropFlag(exports);
+parcelHelpers.export(exports, "RendererWrapper", ()=>RendererWrapper);
+parcelHelpers.export(exports, "CameraWrapper", ()=>CameraWrapper);
+parcelHelpers.export(exports, "ControlsWrapper", ()=>ControlsWrapper);
+parcelHelpers.export(exports, "SceneWrapper", ()=>SceneWrapper);
+var _three = require("three");
+var _orbitControlsJs = require("three/examples/jsm/controls/OrbitControls.js");
+var _sceneUtils = require("./SceneUtils"); // Ensure this is correctly imported or defined
+var _sceneUtilsDefault = parcelHelpers.interopDefault(_sceneUtils);
+class RendererWrapper {
+    constructor(container){
+        this.renderer = new _three.WebGLRenderer({
+            antialias: true
+        });
+        this.renderer.setSize(window.innerWidth, window.innerHeight);
+        container.appendChild(this.renderer.domElement);
+    }
+    render(scene, camera) {
+        this.renderer.render(scene, camera);
+    }
+    setSize(width, height) {
+        this.renderer.setSize(width, height);
+    }
+    getDomElement() {
+        return this.renderer.domElement;
+    }
+}
+class CameraWrapper {
+    constructor(){
+        this.camera = new _three.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        this.camera.position.set(0, 0, 500);
+    }
+    getCamera() {
+        return this.camera;
+    }
+    updateProjectionMatrix() {
+        this.camera.updateProjectionMatrix();
+    }
+    setPosition(x, y, z) {
+        this.camera.position.set(x, y, z);
+    }
+    setAspectRatio(aspectRatio) {
+        this.camera.aspect = aspectRatio;
+    }
+}
+class ControlsWrapper {
+    constructor(cameraWrapper, rendererWrapper){
+        this.controls = new (0, _orbitControlsJs.OrbitControls)(cameraWrapper.getCamera(), rendererWrapper.getDomElement());
+        this.controls.target.set(0, 0, 0);
+    }
+    update() {
+        this.controls.update();
+    }
+}
+class SceneWrapper {
+    constructor(){
+        this.scene = new _three.Scene();
+        this.scene.background = new _three.Color(0xffffff);
+    }
+    add(object) {
+        this.scene.add(object);
+    }
+    remove(object) {
+        this.scene.remove(object);
+    }
+    clear() {
+        while(this.scene.children.length)this.scene.remove(this.scene.children[0]);
+    }
+    getScene() {
+        return this.scene;
+    }
+    addPlane(size) {
+        const plane = (0, _sceneUtilsDefault.default).createPlane(size); // Ensure this function exists and correctly creates a THREE.Mesh or equivalent
+        this.scene.add(plane);
+    }
+}
+
+},{"three":"ktPTu","three/examples/jsm/controls/OrbitControls.js":"7mqRv","./SceneUtils":"k65t5","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"7mqRv":[function(require,module,exports) {
 var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
 parcelHelpers.defineInteropFlag(exports);
 parcelHelpers.export(exports, "OrbitControls", ()=>OrbitControls);
@@ -32664,8 +32767,278 @@ class OrbitControls extends (0, _three.EventDispatcher) {
     }
 }
 
-},{"three":"ktPTu","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}]},["jd9zC","81u0S"], "81u0S", "parcelRequire33bf")
+},{"three":"ktPTu","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"k65t5":[function(require,module,exports) {
+var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
+parcelHelpers.defineInteropFlag(exports);
+var _three = require("three");
+var _orbitControlsJs = require("three/examples/jsm/controls/OrbitControls.js");
+var _loglevel = require("loglevel");
+class SceneUtils {
+    static createPlane(size) {
+        const planeGeometry = new _three.PlaneGeometry(size, size);
+        const planeMaterial = new _three.MeshBasicMaterial({
+            color: 0xcccccc
+        });
+        const plane = new _three.Mesh(planeGeometry, planeMaterial);
+        plane.rotation.x = -Math.PI / 2;
+        return plane;
+    }
+    static createBox(width, height, depth, color, position) {
+        const geometry = new _three.BoxGeometry(width, height, depth);
+        const material = new _three.MeshBasicMaterial({
+            color
+        });
+        const mesh = new _three.Mesh(geometry, material);
+        mesh.position.copy(position);
+        return mesh;
+    }
+    static getIntersectingObjects(raycaster, objects) {
+        return raycaster.intersectObjects(objects, true);
+    }
+}
+exports.default = SceneUtils;
+
+},{"three":"ktPTu","three/examples/jsm/controls/OrbitControls.js":"7mqRv","loglevel":"7kRFs","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"7kRFs":[function(require,module,exports) {
+/*
+* loglevel - https://github.com/pimterry/loglevel
+*
+* Copyright (c) 2013 Tim Perry
+* Licensed under the MIT license.
+*/ (function(root, definition) {
+    "use strict";
+    if (typeof define === "function" && define.amd) define(definition);
+    else if (0, module.exports) module.exports = definition();
+    else root.log = definition();
+})(this, function() {
+    "use strict";
+    // Slightly dubious tricks to cut down minimized file size
+    var noop = function() {};
+    var undefinedType = "undefined";
+    var isIE = typeof window !== undefinedType && typeof window.navigator !== undefinedType && /Trident\/|MSIE /.test(window.navigator.userAgent);
+    var logMethods = [
+        "trace",
+        "debug",
+        "info",
+        "warn",
+        "error"
+    ];
+    var _loggersByName = {};
+    var defaultLogger = null;
+    // Cross-browser bind equivalent that works at least back to IE6
+    function bindMethod(obj, methodName) {
+        var method = obj[methodName];
+        if (typeof method.bind === "function") return method.bind(obj);
+        else try {
+            return Function.prototype.bind.call(method, obj);
+        } catch (e) {
+            // Missing bind shim or IE8 + Modernizr, fallback to wrapping
+            return function() {
+                return Function.prototype.apply.apply(method, [
+                    obj,
+                    arguments
+                ]);
+            };
+        }
+    }
+    // Trace() doesn't print the message in IE, so for that case we need to wrap it
+    function traceForIE() {
+        if (console.log) {
+            if (console.log.apply) console.log.apply(console, arguments);
+            else // In old IE, native console methods themselves don't have apply().
+            Function.prototype.apply.apply(console.log, [
+                console,
+                arguments
+            ]);
+        }
+        if (console.trace) console.trace();
+    }
+    // Build the best logging method possible for this env
+    // Wherever possible we want to bind, not wrap, to preserve stack traces
+    function realMethod(methodName) {
+        if (methodName === "debug") methodName = "log";
+        if (typeof console === undefinedType) return false; // No method possible, for now - fixed later by enableLoggingWhenConsoleArrives
+        else if (methodName === "trace" && isIE) return traceForIE;
+        else if (console[methodName] !== undefined) return bindMethod(console, methodName);
+        else if (console.log !== undefined) return bindMethod(console, "log");
+        else return noop;
+    }
+    // These private functions always need `this` to be set properly
+    function replaceLoggingMethods() {
+        /*jshint validthis:true */ var level = this.getLevel();
+        // Replace the actual methods.
+        for(var i = 0; i < logMethods.length; i++){
+            var methodName = logMethods[i];
+            this[methodName] = i < level ? noop : this.methodFactory(methodName, level, this.name);
+        }
+        // Define log.log as an alias for log.debug
+        this.log = this.debug;
+        // Return any important warnings.
+        if (typeof console === undefinedType && level < this.levels.SILENT) return "No console available for logging";
+    }
+    // In old IE versions, the console isn't present until you first open it.
+    // We build realMethod() replacements here that regenerate logging methods
+    function enableLoggingWhenConsoleArrives(methodName) {
+        return function() {
+            if (typeof console !== undefinedType) {
+                replaceLoggingMethods.call(this);
+                this[methodName].apply(this, arguments);
+            }
+        };
+    }
+    // By default, we use closely bound real methods wherever possible, and
+    // otherwise we wait for a console to appear, and then try again.
+    function defaultMethodFactory(methodName, _level, _loggerName) {
+        /*jshint validthis:true */ return realMethod(methodName) || enableLoggingWhenConsoleArrives.apply(this, arguments);
+    }
+    function Logger(name, factory) {
+        // Private instance variables.
+        var self = this;
+        /**
+       * The level inherited from a parent logger (or a global default). We
+       * cache this here rather than delegating to the parent so that it stays
+       * in sync with the actual logging methods that we have installed (the
+       * parent could change levels but we might not have rebuilt the loggers
+       * in this child yet).
+       * @type {number}
+       */ var inheritedLevel;
+        /**
+       * The default level for this logger, if any. If set, this overrides
+       * `inheritedLevel`.
+       * @type {number|null}
+       */ var defaultLevel;
+        /**
+       * A user-specific level for this logger. If set, this overrides
+       * `defaultLevel`.
+       * @type {number|null}
+       */ var userLevel;
+        var storageKey = "loglevel";
+        if (typeof name === "string") storageKey += ":" + name;
+        else if (typeof name === "symbol") storageKey = undefined;
+        function persistLevelIfPossible(levelNum) {
+            var levelName = (logMethods[levelNum] || "silent").toUpperCase();
+            if (typeof window === undefinedType || !storageKey) return;
+            // Use localStorage if available
+            try {
+                window.localStorage[storageKey] = levelName;
+                return;
+            } catch (ignore) {}
+            // Use session cookie as fallback
+            try {
+                window.document.cookie = encodeURIComponent(storageKey) + "=" + levelName + ";";
+            } catch (ignore) {}
+        }
+        function getPersistedLevel() {
+            var storedLevel;
+            if (typeof window === undefinedType || !storageKey) return;
+            try {
+                storedLevel = window.localStorage[storageKey];
+            } catch (ignore) {}
+            // Fallback to cookies if local storage gives us nothing
+            if (typeof storedLevel === undefinedType) try {
+                var cookie = window.document.cookie;
+                var cookieName = encodeURIComponent(storageKey);
+                var location = cookie.indexOf(cookieName + "=");
+                if (location !== -1) storedLevel = /^([^;]+)/.exec(cookie.slice(location + cookieName.length + 1))[1];
+            } catch (ignore) {}
+            // If the stored level is not valid, treat it as if nothing was stored.
+            if (self.levels[storedLevel] === undefined) storedLevel = undefined;
+            return storedLevel;
+        }
+        function clearPersistedLevel() {
+            if (typeof window === undefinedType || !storageKey) return;
+            // Use localStorage if available
+            try {
+                window.localStorage.removeItem(storageKey);
+            } catch (ignore) {}
+            // Use session cookie as fallback
+            try {
+                window.document.cookie = encodeURIComponent(storageKey) + "=; expires=Thu, 01 Jan 1970 00:00:00 UTC";
+            } catch (ignore) {}
+        }
+        function normalizeLevel(input) {
+            var level = input;
+            if (typeof level === "string" && self.levels[level.toUpperCase()] !== undefined) level = self.levels[level.toUpperCase()];
+            if (typeof level === "number" && level >= 0 && level <= self.levels.SILENT) return level;
+            else throw new TypeError("log.setLevel() called with invalid level: " + input);
+        }
+        /*
+       *
+       * Public logger API - see https://github.com/pimterry/loglevel for details
+       *
+       */ self.name = name;
+        self.levels = {
+            "TRACE": 0,
+            "DEBUG": 1,
+            "INFO": 2,
+            "WARN": 3,
+            "ERROR": 4,
+            "SILENT": 5
+        };
+        self.methodFactory = factory || defaultMethodFactory;
+        self.getLevel = function() {
+            if (userLevel != null) return userLevel;
+            else if (defaultLevel != null) return defaultLevel;
+            else return inheritedLevel;
+        };
+        self.setLevel = function(level, persist) {
+            userLevel = normalizeLevel(level);
+            if (persist !== false) persistLevelIfPossible(userLevel);
+            // NOTE: in v2, this should call rebuild(), which updates children.
+            return replaceLoggingMethods.call(self);
+        };
+        self.setDefaultLevel = function(level) {
+            defaultLevel = normalizeLevel(level);
+            if (!getPersistedLevel()) self.setLevel(level, false);
+        };
+        self.resetLevel = function() {
+            userLevel = null;
+            clearPersistedLevel();
+            replaceLoggingMethods.call(self);
+        };
+        self.enableAll = function(persist) {
+            self.setLevel(self.levels.TRACE, persist);
+        };
+        self.disableAll = function(persist) {
+            self.setLevel(self.levels.SILENT, persist);
+        };
+        self.rebuild = function() {
+            if (defaultLogger !== self) inheritedLevel = normalizeLevel(defaultLogger.getLevel());
+            replaceLoggingMethods.call(self);
+            if (defaultLogger === self) for(var childName in _loggersByName)_loggersByName[childName].rebuild();
+        };
+        // Initialize all the internal levels.
+        inheritedLevel = normalizeLevel(defaultLogger ? defaultLogger.getLevel() : "WARN");
+        var initialLevel = getPersistedLevel();
+        if (initialLevel != null) userLevel = normalizeLevel(initialLevel);
+        replaceLoggingMethods.call(self);
+    }
+    /*
+     *
+     * Top-level API
+     *
+     */ defaultLogger = new Logger();
+    defaultLogger.getLogger = function getLogger(name) {
+        if (typeof name !== "symbol" && typeof name !== "string" || name === "") throw new TypeError("You must supply a name when creating a logger.");
+        var logger = _loggersByName[name];
+        if (!logger) logger = _loggersByName[name] = new Logger(name, defaultLogger.methodFactory);
+        return logger;
+    };
+    // Grab the current global log variable in case of overwrite
+    var _log = typeof window !== undefinedType ? window.log : undefined;
+    defaultLogger.noConflict = function() {
+        if (typeof window !== undefinedType && window.log === defaultLogger) window.log = _log;
+        return defaultLogger;
+    };
+    defaultLogger.getLoggers = function getLoggers() {
+        return _loggersByName;
+    };
+    // ES6 default export, for compatibility
+    defaultLogger["default"] = defaultLogger;
+    return defaultLogger;
+});
+
+},{}]},["lYsYl","jZvPP"], "jZvPP", "parcelRequire33bf")
 
 </script>
-</body>
+  </body>
 </html>
