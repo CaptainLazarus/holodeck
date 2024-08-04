@@ -6,12 +6,11 @@ import SceneUtils from './SceneUtils';
 export default class SceneRenderer {
     constructor(sceneManager, container) {
         this.sceneManager = sceneManager;
-
         this.rendererWrapper = new RendererWrapper(container);
         this.cameraWrapper = new CameraWrapper();
         this.controlsWrapper = new ControlsWrapper(this.cameraWrapper, this.rendererWrapper);
+	// this.raycaster = new THREE.Raycaster();
         this.sceneWrapper = new SceneWrapper();
-
         this.setupEventListeners();
         this.animate();
     }
@@ -24,7 +23,8 @@ export default class SceneRenderer {
     animate() {
         requestAnimationFrame(() => this.animate());
         this.controlsWrapper.update();
-        this.renderScene();
+	this.showCameraInfo();
+        // this.renderScene();
         this.rendererWrapper.render(this.sceneWrapper.getScene(), this.cameraWrapper.getCamera());
     }
 
@@ -47,22 +47,24 @@ export default class SceneRenderer {
     }
 
     handleClick(event) {
-        const mousePosition = new THREE.Vector2(
-            (event.clientX / window.innerWidth) * 2 - 1,
-            -(event.clientY / window.innerHeight) * 2 + 1
-        );
+	const rect = this.rendererWrapper.getDomElement().getBoundingClientRect();
+	this.addBox(event.clientX - rect.left, event.clientY - rect.top);
+    }
 
-        const raycaster = new THREE.Raycaster();
-        raycaster.setFromCamera(mousePosition, this.cameraWrapper.getCamera());
+    addBox(){
+	this.mouse.x = (x / this.renderer.domElement.clientWidth) * 2 - 1;
+	this.mouse.y = -(y / this.renderer.domElement.clientHeight) * 2 + 1;
+	this.sceneWrapper.getScene().raycaster.setFromCamera(this.mouse, this.camera);
 
-        const intersects = SceneUtils.getIntersectingObjects(raycaster, this.sceneWrapper.getScene().children);
+	// Initialize a new Vector3 for the intersection point
+	const intersectionPoint = new THREE.Vector3();
 
-        if (intersects.length > 0) {
-            const firstIntersectedObject = intersects[0].object;
-            this.handleBoxClick(firstIntersectedObject);
-        } else {
-            this.handlePlaneClick(raycaster);
-        }
+	// Determine the point where the picking ray intersects the plane
+	if (this.raycaster.ray.intersectPlane(this.plane, intersectionPoint)) {
+            const box = new Box(60, 30, 30, 0x000000, {x: intersectionPoint.x, y: intersectionPoint.y, z: intersectionPoint.z});
+            this.scene.add(box.mesh);
+	    this.boxes.push(box); // Keep track of the box
+	}
     }
 
     handleBoxClick(intersectedBox) {
@@ -74,18 +76,24 @@ export default class SceneRenderer {
     }
 
     handlePlaneClick(raycaster) {
-        // Assume this method aims to add a new box where the plane was clicked.
-        const intersects = SceneUtils.getIntersectingObjects(raycaster, [this.sceneWrapper.getScene().children.find(child => child.type === 'Mesh')]); // Assuming the plane is the first Mesh added to the scene
+        const intersects = SceneUtils.getIntersectingObjects(raycaster, [this.sceneWrapper.getScene().children.find(child => child.type === 'Mesh')]);
 
         if (intersects.length > 0) {
             const intersect = intersects[0];
             this.sceneManager.addBox({
-                width: 50, // Example dimensions and color
+                width: 50,
                 height: 50,
                 depth: 50,
                 color: this.defaultColor,
                 position: intersect.point
             });
         }
+    }
+
+    showCameraInfo() {
+	const pos = this.cameraWrapper.camera.position;
+	const rot = this.cameraWrapper.camera.rotation;
+	const info = `Position: (${pos.x.toFixed(2)}, ${pos.y.toFixed(2)}, ${pos.z.toFixed(2)}) Rotation: (${rot.x.toFixed(2)}, ${rot.y.toFixed(2)}, ${rot.z.toFixed(2)})`;
+	document.getElementById("cameraInfo").innerText = info;
     }
 }

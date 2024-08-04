@@ -2,7 +2,7 @@
 
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
-import SceneUtils from './SceneUtils'; // Ensure this is correctly imported or defined
+import SceneUtils from './SceneUtils';
 
 export class RendererWrapper {
     constructor(container) {
@@ -54,6 +54,7 @@ export class SceneWrapper {
     constructor() {
         this.scene = new THREE.Scene();
         this.scene.background = new THREE.Color(0xffffff);
+	this.raycaster = new THREE.Raycaster();
     }
     add(object) {
         this.scene.add(object);
@@ -70,7 +71,7 @@ export class SceneWrapper {
         return this.scene;
     }
     addPlane(size) {
-        const plane = SceneUtils.createPlane(size); // Ensure this function exists and correctly creates a THREE.Mesh or equivalent
+        const plane = SceneUtils.createPlane(size);
         this.scene.add(plane);
     }
 }

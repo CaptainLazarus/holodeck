@@ -16,7 +16,6 @@ canvas {
   <body>
     <div id="scene-container" style="width: 100%; height: 100vh"></div>
     <div id="cameraInfo" style="color: #fff; background: #000; padding: 5px; position: absolute; top: 0; left: 0"></div>
-    <script src="https://unpkg.com/three/build/three.min.js"></script>
     <script>// modules are defined as an array
 // [ module function, map of requires ]
 //
@@ -161,14 +160,14 @@ canvas {
       this[globalName] = mainExports;
     }
   }
-})({"lYsYl":[function(require,module,exports) {
+})({"QQt8Y":[function(require,module,exports) {
 var global = arguments[3];
 var HMR_HOST = null;
 var HMR_PORT = 1234;
 var HMR_SECURE = false;
 var HMR_ENV_HASH = "d6ea1d42532a7575";
 var HMR_USE_SSE = false;
-module.bundle.HMR_BUNDLE_ID = "746d8206ff79fe9f";
+module.bundle.HMR_BUNDLE_ID = "9ddcd15f4182578b";
 "use strict";
 /* global HMR_HOST, HMR_PORT, HMR_ENV_HASH, HMR_SECURE, HMR_USE_SSE, chrome, browser, __parcel__import__, __parcel__importScripts__, ServiceWorkerGlobalScope */ /*::
 import type {
@@ -602,7 +601,7 @@ function hmrAccept(bundle /*: ParcelRequire */ , id /*: string */ ) {
     });
 }
 
-},{}],"jZvPP":[function(require,module,exports) {
+},{}],"d7jqD":[function(require,module,exports) {
 var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
 var _sceneManagerJs = require("./js/SceneManager.js");
 var _sceneManagerJsDefault = parcelHelpers.interopDefault(_sceneManagerJs);
@@ -31785,6 +31784,7 @@ class SceneRenderer {
         this.rendererWrapper = new (0, _threeJSWrapper.RendererWrapper)(container);
         this.cameraWrapper = new (0, _threeJSWrapper.CameraWrapper)();
         this.controlsWrapper = new (0, _threeJSWrapper.ControlsWrapper)(this.cameraWrapper, this.rendererWrapper);
+        // this.raycaster = new THREE.Raycaster();
         this.sceneWrapper = new (0, _threeJSWrapper.SceneWrapper)();
         this.setupEventListeners();
         this.animate();
@@ -31796,7 +31796,8 @@ class SceneRenderer {
     animate() {
         requestAnimationFrame(()=>this.animate());
         this.controlsWrapper.update();
-        this.renderScene();
+        this.showCameraInfo();
+        // this.renderScene();
         this.rendererWrapper.render(this.sceneWrapper.getScene(), this.cameraWrapper.getCamera());
     }
     renderScene() {
@@ -31815,14 +31816,25 @@ class SceneRenderer {
         this.rendererWrapper.setSize(window.innerWidth, window.innerHeight);
     }
     handleClick(event) {
-        const mousePosition = new _three.Vector2(event.clientX / window.innerWidth * 2 - 1, -(event.clientY / window.innerHeight) * 2 + 1);
-        const raycaster = new _three.Raycaster();
-        raycaster.setFromCamera(mousePosition, this.cameraWrapper.getCamera());
-        const intersects = (0, _sceneUtilsDefault.default).getIntersectingObjects(raycaster, this.sceneWrapper.getScene().children);
-        if (intersects.length > 0) {
-            const firstIntersectedObject = intersects[0].object;
-            this.handleBoxClick(firstIntersectedObject);
-        } else this.handlePlaneClick(raycaster);
+        const rect = this.rendererWrapper.getDomElement().getBoundingClientRect();
+        this.addBox(event.clientX - rect.left, event.clientY - rect.top);
+    }
+    addBox() {
+        this.mouse.x = x / this.renderer.domElement.clientWidth * 2 - 1;
+        this.mouse.y = -(y / this.renderer.domElement.clientHeight) * 2 + 1;
+        this.sceneWrapper.getScene().raycaster.setFromCamera(this.mouse, this.camera);
+        // Initialize a new Vector3 for the intersection point
+        const intersectionPoint = new _three.Vector3();
+        // Determine the point where the picking ray intersects the plane
+        if (this.raycaster.ray.intersectPlane(this.plane, intersectionPoint)) {
+            const box = new Box(60, 30, 30, 0x000000, {
+                x: intersectionPoint.x,
+                y: intersectionPoint.y,
+                z: intersectionPoint.z
+            });
+            this.scene.add(box.mesh);
+            this.boxes.push(box); // Keep track of the box
+        }
     }
     handleBoxClick(intersectedBox) {
         // Example: toggle box color between default and highlight.
@@ -31831,10 +31843,9 @@ class SceneRenderer {
     // Update sceneManager or handle as needed
     }
     handlePlaneClick(raycaster) {
-        // Assume this method aims to add a new box where the plane was clicked.
         const intersects = (0, _sceneUtilsDefault.default).getIntersectingObjects(raycaster, [
             this.sceneWrapper.getScene().children.find((child)=>child.type === "Mesh")
-        ]); // Assuming the plane is the first Mesh added to the scene
+        ]);
         if (intersects.length > 0) {
             const intersect = intersects[0];
             this.sceneManager.addBox({
@@ -31845,6 +31856,12 @@ class SceneRenderer {
                 position: intersect.point
             });
         }
+    }
+    showCameraInfo() {
+        const pos = this.cameraWrapper.camera.position;
+        const rot = this.cameraWrapper.camera.rotation;
+        const info = `Position: (${pos.x.toFixed(2)}, ${pos.y.toFixed(2)}, ${pos.z.toFixed(2)}) Rotation: (${rot.x.toFixed(2)}, ${rot.y.toFixed(2)}, ${rot.z.toFixed(2)})`;
+        document.getElementById("cameraInfo").innerText = info;
     }
 }
 exports.default = SceneRenderer;
@@ -31859,7 +31876,7 @@ parcelHelpers.export(exports, "ControlsWrapper", ()=>ControlsWrapper);
 parcelHelpers.export(exports, "SceneWrapper", ()=>SceneWrapper);
 var _three = require("three");
 var _orbitControlsJs = require("three/examples/jsm/controls/OrbitControls.js");
-var _sceneUtils = require("./SceneUtils"); // Ensure this is correctly imported or defined
+var _sceneUtils = require("./SceneUtils");
 var _sceneUtilsDefault = parcelHelpers.interopDefault(_sceneUtils);
 class RendererWrapper {
     constructor(container){
@@ -31910,6 +31927,7 @@ class SceneWrapper {
     constructor(){
         this.scene = new _three.Scene();
         this.scene.background = new _three.Color(0xffffff);
+        this.raycaster = new _three.Raycaster();
     }
     add(object) {
         this.scene.add(object);
@@ -31924,7 +31942,7 @@ class SceneWrapper {
         return this.scene;
     }
     addPlane(size) {
-        const plane = (0, _sceneUtilsDefault.default).createPlane(size); // Ensure this function exists and correctly creates a THREE.Mesh or equivalent
+        const plane = (0, _sceneUtilsDefault.default).createPlane(size);
         this.scene.add(plane);
     }
 }
@@ -33037,7 +33055,7 @@ exports.default = SceneUtils;
     return defaultLogger;
 });
 
-},{}]},["lYsYl","jZvPP"], "jZvPP", "parcelRequire33bf")
+},{}]},["QQt8Y","d7jqD"], "d7jqD", "parcelRequire33bf")
 
 </script>
   </body>
